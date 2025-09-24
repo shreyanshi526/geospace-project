@@ -58,20 +58,18 @@ jobs:
 
     # 8. Backend type check (mypy)
     - name: Backend Type Check
-      run: cd daruka-backend && mypy .
+      run: npm run lint:backend
 
     # 9. Frontend type check (TypeScript)
     - name: Frontend Type Check
       run: |
-        cd darukaa-frontend
-        if [ -f tsconfig.json ]; then npx tsc --noEmit; else echo "Skipping TS check"; fi
+        if [ -f darukaa-frontend/tsconfig.json ]; then npx tsc --noEmit -p darukaa-frontend; else echo "Skipping TS check"; fi
 
     # 10. Backend security check (Bandit)
     - name: Backend Security Check
       run: |
-        cd daruka-backend
-        if command -v bandit &> /dev/null; then bandit -r .; else echo "Skipping Bandit"; fi
+        if command -v bandit &> /dev/null; then bandit -r daruka-backend; else echo "Skipping Bandit"; fi
 
     # 11. Frontend build check
     - name: Frontend Build
-      run: cd darukaa-frontend && npm run build
+      run: npm run build:frontend

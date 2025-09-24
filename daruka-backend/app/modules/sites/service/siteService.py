@@ -41,7 +41,6 @@ class SiteService:
         if not site:
             raise ValueError("Site not found")
 
-        # Save old analytics into history before updating
         if site.analytics:
             await SiteRepo.add_analytics_history(
                 session,

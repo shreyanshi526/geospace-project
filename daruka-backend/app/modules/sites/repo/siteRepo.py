@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-
+from app.modules.project.models.projectModel import Project
 from app.core.common.id_generator import generate_site_analytics_id, generate_site_id
 from app.modules.sites.models.siteModal import Site, SiteAnalyticsHistory
 
@@ -14,8 +14,14 @@ class SiteRepo:
         try:
             site = Site(**kwargs)
             session.add(site)
+
+            await session.execute(
+                update(Project)
+                .where(Project.p_id == site.project_id)
+                .values(sites_added_total=Project.sites_added_total + 1)
+            )
+
             await session.commit()
-            await session.refresh(site)
             return site
         except Exception as e:
             await session.rollback()
@@ -53,13 +59,23 @@ class SiteRepo:
             await session.rollback()
             raise RuntimeError(f"DB Error updating site: {str(e)}")
 
-    @staticmethod
     async def delete_site(session: AsyncSession, site_id: str):
-        site = await SiteRepo.get_site_by_id(session, site_id)
-        if site:
-            await session.delete(site)
-            await session.commit()
-        return site
+        try:
+            site = await SiteRepo.get_site_by_id(session, site_id)
+            if site:
+                # decrement project counter
+                await session.execute(
+                    update(Project)
+                    .where(Project.p_id == site.project_id)
+                    .values(sites_added_total=Project.sites_added_total - 1)
+                )
+
+                await session.delete(site)
+                await session.commit()
+            return site
+        except Exception as e:
+            await session.rollback()
+            raise RuntimeError(f"DB Error deleting site: {str(e)}")
 
     @staticmethod
     async def add_analytics_history(session: AsyncSession, **kwargs):
