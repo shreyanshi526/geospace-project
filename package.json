@@ -9,7 +9,7 @@
     "install:backend": "cd daruka-backend && pip install -r requirements.txt",
     "install:backend-dev": "cd daruka-backend && pip install -r requirements-dev.txt",
     "lint": "npm run lint:frontend && npm run lint:backend",
-    "lint:frontend": "cd darukaa-frontend && eslint . --ext .js,.jsx,.ts,.tsx --ignore-path .gitignore",
+    "lint:frontend": "cd darukaa-frontend && eslint . --ext .js,.jsx,.ts,.tsx",
     "lint:frontend:fix": "cd darukaa-frontend && eslint . --ext .js,.jsx,.ts,.tsx --fix --ignore-path .gitignore",
     "lint:backend": "cd daruka-backend && flake8 . && mypy . || true",
     "format": "npm run format:frontend && npm run format:backend",
