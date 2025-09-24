@@ -2,14 +2,13 @@ import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 
 // Create Axios instance
 const api = axios.create({
-  baseURL: `${process.env.REACT_APP_API_URL}/api/v1`, // update baseURL
+  baseURL: `${process.env.VITE_API_URL}/api/v1`,
   timeout: 10000,
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-// Request interceptor → attach token
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("access_token");
@@ -21,7 +20,7 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response interceptor → extract data / handle errors
+
 api.interceptors.response.use(
   (response: AxiosResponse) => response,
   (error) => {
@@ -31,7 +30,7 @@ api.interceptors.response.use(
   }
 );
 
-// --- Generic API Methods --- //
+
 const http = {
   get: <T = any>(url: string, config?: AxiosRequestConfig): Promise<T> =>
     api.get<T>(url, config).then((res) => res.data),
