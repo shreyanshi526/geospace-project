@@ -2,39 +2,75 @@ import React, { useState } from "react";
 import Input from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import MapView from "@/features/map/components/MapView";
-import { X } from "lucide-react";
+import { Save, X } from "lucide-react";
+import Modal from "@/components/ui/Modal";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-hot-toast";
+import {
+  createSite,
+  SiteCreatePayload,
+  Site,
+  ApiResponse,
+} from "@/features/sites/api/sitesAPI";
+import { SITES_KEY } from '@/features/sites/api/useSites'
+import { useParams } from "react-router-dom";
 
 interface SiteFormProps {
-  mode: "add" | "edit";
-  initialData?: {
-    name: string;
-    description: string;
-    type: string;
-    area: string;
-    polygon: [number, number][];
-  };
-  onSubmit: (data: any) => void;
+  p_id: string,
   onClose: () => void;
 }
 
-export default function SiteForm({
-  mode,
-  initialData,
-  onSubmit,
-  onClose,
-}: SiteFormProps) {
-  const [name, setName] = useState(initialData?.name || "");
-  const [description, setDescription] = useState(initialData?.description || "");
-  const [type, setType] = useState(initialData?.type || "");
-  const [area, setArea] = useState(initialData?.area || "");
-  const [polygon, setPolygon] = useState<[number, number][]>(
-    initialData?.polygon || []
-  );
+export default function SiteForm({ p_id, onClose }: SiteFormProps) {
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [type, setType] = useState("");
+  const [area, setArea] = useState("");
+  const [location, setLocation] = useState("");
+  const [polygon, setPolygon] = useState<[number, number][]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const queryClient = useQueryClient();
+
+  const createMutation = useMutation<
+    ApiResponse<{ site: Site }>,
+    Error,
+    SiteCreatePayload
+  >({
+    mutationFn: createSite,
+    onSuccess: () => {
+      toast.success("Site created successfully!");
+      queryClient.invalidateQueries({ queryKey: ['projects', p_id] });
+      onClose();
+    },
+    onError: (err) => toast.error(err.message || "Failed to create site"),
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit({ name, description, type, area, polygon });
-    onClose(); // close after submit
+
+    const dummyAnalytics = {
+      "Air Quality Index": { value: 72, unit: "AQI" },
+      "Avg. Temperature": { value: 28, unit: "°C" },
+      "Rainfall": { value: 15, unit: "mm" },
+      "Soil Moisture": { value: 42, unit: "%" },
+      "Vegetation Index": { value: 0.65, unit: "NDVI" },
+    };
+
+    const payload: SiteCreatePayload = {
+      name,
+      description,
+      project_id: p_id, // You can make this dynamic if needed
+      area: parseFloat(area) || 0,
+      location: location || "Unknown",
+      geolocation: polygon.map(([lat, lon]) => ({ lat, lon })),
+      analytics: dummyAnalytics,
+    };
+
+    createMutation.mutate(payload);
+  };
+
+  const handlePolygonUpdate = (coords: [number, number][]) => {
+    setPolygon(coords);
   };
 
   return (
@@ -48,9 +84,7 @@ export default function SiteForm({
           <X size={20} />
         </button>
 
-        <h2 className="text-xl font-bold mb-4">
-          {mode === "add" ? "Add Site" : "Edit Site"}
-        </h2>
+        <h2 className="text-xl font-bold mb-4">Add Site</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <Input
@@ -78,33 +112,68 @@ export default function SiteForm({
             label="Area"
             value={area}
             onChange={(e) => setArea(e.target.value)}
-            placeholder="e.g., 12.5 km²"
+            placeholder="e.g., 100.5"
           />
 
-          {/* Map Picker */}
-          <div>
-            <p className="text-sm font-medium text-gray-700 mb-2">
-              Select Area on Map
-            </p>
-            <MapView
-              onPolygonDrawn={(coords: [number, number][]) => setPolygon(coords)}
-            />
-            {polygon.length > 0 && (
-              <p className="text-xs text-green-600 mt-2">
-                Polygon with {polygon.length} points selected.
-              </p>
-            )}
-          </div>
+          <Input
+            label="Location"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            placeholder="Enter location"
+          />
 
-          <div className="flex justify-end space-x-3">
-            <Button variant="secondary" type="button" onClick={onClose}>
-              Cancel
+          <div className="flex justify-between">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => setIsModalOpen(true)}
+            >
+              Add Boundary
             </Button>
-            <Button type="submit" variant="primary">
-              {mode === "add" ? "Add Site" : "Save Changes"}
-            </Button>
+
+            <div className="flex space-x-3">
+              <Button variant="secondary" type="button" onClick={onClose}>
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                variant="primary"
+              >
+                Add Site
+              </Button>
+            </div>
           </div>
         </form>
+
+        {isModalOpen && (
+          <Modal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            title="Edit Site Boundary"
+          >
+            <div className="w-full h-[70vh] flex flex-col gap-4">
+              <div className="flex-1 border border-gray-200 rounded-lg overflow-hidden">
+                <MapView
+                  polygons={
+                    polygon.length > 0
+                      ? [polygon.map(([lat, lon]) => ({ lat, lon }))]
+                      : undefined
+                  }
+                  onPolygonDrawn={handlePolygonUpdate}
+                />
+              </div>
+              <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
+                <Button variant="secondary" onClick={() => setIsModalOpen(false)}>
+                  Cancel
+                </Button>
+                <Button variant="primary" onClick={() => setIsModalOpen(false)}>
+                  <Save className="w-4 h-4" />
+                  Save Boundary
+                </Button>
+              </div>
+            </div>
+          </Modal>
+        )}
       </div>
     </div>
   );

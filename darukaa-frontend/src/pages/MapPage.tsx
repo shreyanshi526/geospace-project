@@ -3,7 +3,7 @@ import MapView from "@/features/map/components/MapView"
 export default function MapPage() {
   return (
     <div className="h-screen w-screen">
-      <MapView
+      {/* <MapView
         polygons={[
           [
             [28.7041, 77.1025],
@@ -11,7 +11,7 @@ export default function MapPage() {
             [28.7045, 77.1045],
           ],
         ]}
-      />
+      /> */}
     </div>
   )
 }

@@ -10,7 +10,6 @@ interface SiteListProps {
 export const SiteList: React.FC<SiteListProps> = ({ sites, onViewAnalytics }) => {
   const normalizedSites = Array.isArray(sites) ? sites : sites?.sites || [];
 
-  console.log(normalizedSites, "normalizedSites");
 
   if (normalizedSites.length === 0) {
     return <p className="text-gray-500">No sites available</p>;

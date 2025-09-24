@@ -72,7 +72,6 @@ class SiteService:
             raise ValueError("Site not found")
         return site
 
-    # ---------------- New Methods ---------------- #
 
     @staticmethod
     async def get_site_by_id(session: AsyncSession, site_id: str):

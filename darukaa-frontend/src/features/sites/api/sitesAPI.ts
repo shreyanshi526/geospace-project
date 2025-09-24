@@ -1,11 +1,6 @@
 import http from "@/api/axios";
 
 
-export interface Geolocation {
-  lat: number;
-  lon: number;
-}
-
 export interface AnalyticsMetric {
   value: number;
   unit: string;
@@ -21,7 +16,7 @@ export interface Site {
   description?: string;
   area?: number;
   location?: string;
-  geolocation?: Geolocation;
+  geolocation?: { lat: number; lon: number; }[];
   analytics?: SiteAnalytics;
 
   project_id: string;
@@ -37,7 +32,7 @@ export interface sites {
   description?: string;
   area?: number;
   location?: string;
-  geolocation?: Geolocation;
+  geolocation?: { lat: number; lon: number; }[];
   analytics?: SiteAnalytics;
 
   project_id: string;
@@ -53,7 +48,7 @@ export interface SiteCreatePayload {
   description?: string;
   area?: number;
   location?: string;
-  geolocation?: Geolocation;
+  geolocation?: { lat: number; lon: number; }[];
   project_id: string;
   analytics?: SiteAnalytics;
 }
@@ -63,7 +58,7 @@ export interface SiteUpdatePayload {
   description?: string;
   area?: number;
   location?: string;
-  geolocation?: Geolocation;
+  geolocation?: { lat: number; lon: number; }[];
   analytics?: SiteAnalytics;
 }
 

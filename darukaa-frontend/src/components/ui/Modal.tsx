@@ -12,7 +12,7 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps) 
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white rounded-xl shadow-lg w-full max-w-2xl p-6">
+      <div className="bg-white rounded-xl shadow-lg p-6 w-[90%] h-[80vh] max-w-none">
         {/* Header */}
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold">{title}</h2>
@@ -23,8 +23,6 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps) 
             ×
           </button>
         </div>
-
-        {/* Content */}
         <div>{children}</div>
       </div>
     </div>

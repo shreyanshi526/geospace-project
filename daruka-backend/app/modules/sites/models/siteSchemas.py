@@ -9,7 +9,7 @@ class SiteBase(BaseModel):
     description: Optional[str] = None
     area: Optional[float] = None
     location: Optional[str] = None
-    geolocation: Optional[Dict[str, float]] = None
+    geolocation: Optional[List[Dict[str, float]]] = None
     analytics: Optional[Dict[str, Any]] = None
 
 

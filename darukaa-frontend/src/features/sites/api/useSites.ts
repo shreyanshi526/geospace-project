@@ -18,7 +18,7 @@ import {
 } from "./sitesAPI";
 
 // Query key for caching
-const SITES_KEY: QueryKey = ["sites"];
+export const SITES_KEY: QueryKey = ["sites"];
 
 export function useSites() {
   const queryClient = useQueryClient();
