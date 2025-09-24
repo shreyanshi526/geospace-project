@@ -6,6 +6,11 @@ It enables administrators to create projects, add multiple sites (as polygons), 
 This project was built as part of the **Darukaa.Earth Full-Stack Developer Hackathon Challenge**.
 
 ---
+## 🔗 Live Demo
+
+👉 [Geospace Project (Darukaa.Earth)](https://geospace-project.vercel.app/)
+
+---
 
 ## 🚀 High-Level Architecture
 
