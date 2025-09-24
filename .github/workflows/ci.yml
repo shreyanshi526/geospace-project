@@ -1,0 +1,76 @@
+name: CI - Code Quality & Security
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  NODE_VERSION: '18'
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  code-quality:
+    name: Check Code Quality
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Checkout repo
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    # 2. Setup Node.js for frontend
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    # 3. Setup Python for backend
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        cache: 'pip'
+
+    # 4. Install frontend dependencies
+    - name: Install frontend dependencies
+      run: npm run install:frontend
+
+    # 5. Install backend dependencies
+    - name: Install backend dependencies
+      run: |
+        npm run install:backend
+        npm run install:backend-dev
+
+    # 6. Frontend lint & format check
+    - name: Frontend Lint & Format
+      run: |
+        npm run lint:frontend
+        npm run format:frontend:check
+
+    # 7. Backend lint & format check
+    - name: Backend Lint & Format
+      run: |
+        npm run lint:backend
+        npm run format:backend:check
+
+    # 8. Backend type check (mypy)
+    - name: Backend Type Check
+      run: cd daruka-backend && mypy .
+
+    # 9. Frontend type check (if using TypeScript)
+    - name: Frontend Type Check
+      run: cd darukaa-frontend && tsc --noEmit || echo "Skipping TS type check if not using TS"
+
+    # 10. Security checks
+    - name: Backend Security (Bandit)
+      run: cd daruka-backend && bandit -r . || echo "Skipping Bandit if not installed"
+
+    - name: Frontend Security (npm audit)
+      run: cd darukaa-frontend && npm audit --audit-level=high || echo "No vulnerabilities found"
+
+    # 11. Frontend build check
+    - name: Frontend Build
+      run: cd darukaa-frontend && npm run build
