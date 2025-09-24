@@ -25,7 +25,12 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
       login.mutate({ email: form.email, password: form.password }, { onSuccess: onSuccess });
       onClose();
     } else {
-      signup.mutate(form, { onSuccess: onSuccess });
+      signup.mutate(form, {
+        onSuccess: () => {
+          onSuccess?.();
+          window.location.reload();
+        },
+      });
       onClose();
     }
   };
@@ -87,8 +92,8 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
                   ? "Logging in..."
                   : "Login"
                 : signup.isPending
-                ? "Signing up..."
-                : "Sign Up"}
+                  ? "Signing up..."
+                  : "Sign Up"}
             </Button>
           </form>
 
