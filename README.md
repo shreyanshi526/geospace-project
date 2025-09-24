@@ -23,7 +23,11 @@ The platform is structured into three main layers:
 
 - **Backend (FastAPI + Python)**  
   - REST APIs for authentication, project management, site management, and analytics history.  
-  - JWT-based authentication ensures secure, stateless sessions, which are easier to scale with distributed systems.  
+  - **JWT-based authentication** with both **access tokens** and **refresh tokens** for better security and user experience.  
+  - Implemented a dedicated **`refresh_access_token`** endpoint:  
+    - Uses a valid refresh token to issue a new short-lived access token.  
+    - Ensures users stay logged in without needing to re-enter credentials.  
+    - Enhances security by keeping access tokens ephemeral while maintaining seamless UX.  
   - Database access via SQLAlchemy (async).  
 
 - **Database (PostgreSQL)**  
