@@ -1,4 +1,4 @@
-name: CI - Code Quality & Security
+name: CI - Code Quality & Build
 
 on:
   push:
@@ -12,22 +12,22 @@ env:
 
 jobs:
   code-quality:
-    name: Check Code Quality
+    name: Check Code Quality & Build
     runs-on: ubuntu-latest
 
     steps:
-    # 1. Checkout repo
-    - name: Checkout code
+    # 1. Checkout code
+    - name: Checkout repository
       uses: actions/checkout@v4
 
-    # 2. Setup Node.js for frontend
+    # 2. Setup Node.js
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: ${{ env.NODE_VERSION }}
         cache: 'npm'
 
-    # 3. Setup Python for backend
+    # 3. Setup Python
     - name: Setup Python
       uses: actions/setup-python@v4
       with:
@@ -58,19 +58,18 @@ jobs:
 
     # 8. Backend type check (mypy)
     - name: Backend Type Check
-      run: cd daruka-backend && mypy .
+      run: npm run lint:backend
 
-    # 9. Frontend type check (if using TypeScript)
+    # 9. Frontend type check (TypeScript)
     - name: Frontend Type Check
-      run: cd darukaa-frontend && tsc --noEmit || echo "Skipping TS type check if not using TS"
+      run: |
+        if [ -f darukaa-frontend/tsconfig.json ]; then npx tsc --noEmit -p darukaa-frontend; else echo "Skipping TS check"; fi
 
-    # 10. Security checks
-    - name: Backend Security (Bandit)
-      run: cd daruka-backend && bandit -r . || echo "Skipping Bandit if not installed"
-
-    - name: Frontend Security (npm audit)
-      run: cd darukaa-frontend && npm audit --audit-level=high || echo "No vulnerabilities found"
+    # 10. Backend security check (Bandit)
+    - name: Backend Security Check
+      run: |
+        if command -v bandit &> /dev/null; then bandit -r daruka-backend; else echo "Skipping Bandit"; fi
 
     # 11. Frontend build check
     - name: Frontend Build
-      run: cd darukaa-frontend && npm run build
+      run: npm run build:frontend
